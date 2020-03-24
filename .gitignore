@@ -26,6 +26,7 @@ cconfig.h
 
 # Keil
 *.crf
+*.hex
 *.axf
 *.crf
 *.htm
@@ -33,6 +34,7 @@ cconfig.h
 *.dep
 *.iex
 *.lst
+*.sct
 
 # Prerequisites
 *.d
