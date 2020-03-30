@@ -218,13 +218,6 @@ void Key_Scan(void)
             case NO_JUMPING:break;
             default:break;
         }
-        
-        //按照事件调用处理函数
-        if(KEY_NOEVENT != UserKeys[i].Events)
-        {
-            UserKeys[i].pDealFunc(UserKeys[i].Events);
-            UserKeys[i].Events = KEY_NOEVENT;
-        }
     }
     
     if(TimeCnt > (KEY_SCAN_PERIOD - 1))
@@ -270,15 +263,30 @@ void Key_Int(uint16_t GPIO_Pin)
             //按键被释放了，说明逻辑下降沿发生了
             UserKeys[KeyIndex].Events = (KeyEvents_t)(UserKeys[KeyIndex].Target_Events & KEY_EVENT_UP);
         }
-        
-        //按照事件调用处理函数
-        if(KEY_NOEVENT != UserKeys[KeyIndex].Events)
-        {
-            UserKeys[KeyIndex].pDealFunc(UserKeys[KeyIndex].Events);
-            UserKeys[KeyIndex].Events = KEY_NOEVENT;
-        }
     }
     else { return; }
+    
+    return;
+}
+
+/**
+ * @brief	执行按键事件响应
+ * @param	None.
+ * @retval	None
+ * @note    此函数期望被在主循环中调用，用来执行已被标记的Key事件响应。
+ */
+void Key_EventScan(void)
+{
+    //遍历所有按键
+    for(uint32_t i = 0; i < KeyNum; i++)
+    {       
+        //按照事件调用处理函数
+        if(KEY_NOEVENT != UserKeys[i].Events)
+        {
+            UserKeys[i].pDealFunc(UserKeys[i].Events);
+            UserKeys[i].Events = KEY_NOEVENT;
+        }
+    }
     
     return;
 }

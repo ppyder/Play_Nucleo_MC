@@ -11,13 +11,15 @@ void UserKeyInit(void)
 {
     //初始化按键，设定滤波窗口为5*5ms。
 #ifdef USING_SCAN
-    Key_Scan_Init( &UserKeys[Key1], Key1DealFunc, KEY_TYPE_INCHING, ////KEY_TYPE_SWITCH
+    Key_Scan_Init( &UserKeys[Key1], Key1DealFunc, KEY_TYPE_SWITCH, //KEY_TYPE_INCHING//
                    5, 5, GPIOC, GPIO_PIN_13, GPIO_PIN_RESET );
 #else
     Key_INT_Init( &UserKeys[Key1], Key1DealFunc, KEY_TYPE_SWITCH, //KEY_TYPE_INCHING//
                   EXTI_LINE_13, GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 #endif
 }
+
+#include "AS5048a.h"
 
 //按键处理函数
 void Key1DealFunc(KeyEvents_t Event)
@@ -32,6 +34,7 @@ void Key1DealFunc(KeyEvents_t Event)
     }
     if(KEY_EVENT_PRESS == Event)
     {
+        AS5048a_Test();
         LED_ON_OFF_Toggle(&UserLEDs[Dev_LED]);////&UserLEDs[Board_LED]
     }
 }

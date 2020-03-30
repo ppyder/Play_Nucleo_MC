@@ -365,6 +365,22 @@ void LED_Task_Abort(pLED_t pLED)
 }
 
 /**
+ * @brief	    变更周期性任务中的LED变化周期（频率）
+ * @param[in]	pLED      - 指向被初始化结构体的指针
+ * @param[in]	NewPeriod - 重新被指定的变化周期，单位ms
+ * @retval	    None.
+ * @note        可以在任务执行过程中生效，多用于无限次任务中修改闪烁或呼吸频率的场合。
+ *              例如：对温度或功率，可以通过LED变化频率变化来反映其变化。
+ */
+void LED_Task_AdjPeriod(pLED_t pLED, uint32_t NewPeriod)
+{
+    //设定新周期
+    pLED->Period = NewPeriod;
+    
+    return;
+}
+
+/**
  * @brief	LED周期性状态调整
  * @param	None.
  * @retval	None.

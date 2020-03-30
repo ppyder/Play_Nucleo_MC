@@ -21,6 +21,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
+#include "spi.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -29,6 +31,7 @@
 /* USER CODE BEGIN Includes */
 #include "UserKey.h" 
 #include "UserLED.h" 
+#include "AD_Monitor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,11 +62,10 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 uint32_t Temp = 0;
 uint8_t Temp_ch = '\0';
 
-uint32_t ADC_Value = 0;
-float Light_Level = 0;
 /* USER CODE END 0 */
 
 /**
@@ -95,18 +97,17 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC1_Init();
   MX_USART2_UART_Init();
   MX_TIM2_Init();
+  MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
 
     //获取系统频率
     Temp = HAL_RCC_GetSysClockFreq();
-    
-    //开启旋钮ADC转换
-    HAL_ADC_Start(&hadc1);
-    
-    //开启串口接收
+        
+    //开启串口接收(测试用)
     HAL_UART_Receive_IT(&huart2, &Temp_ch, 1);
     
     //启动定时器时基
@@ -118,30 +119,26 @@ int main(void)
     //初始化用户LED
     UserLED_Init();
     
-    //开灯
-    //LED_TurnON(&UserLEDs[Board_LED]);
+    //AD监视器初始化
+    AD_MonitorInit();
+    
+    //获取ADC频率
+    Temp = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_ADC1);
+    
+    //测试发送字节
+    HAL_UART_Transmit_IT(&huart2, (uint8_t*)Str, sizeof(Str));
     
   /* USER CODE END 2 */
+ 
+ 
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-      //测试发送字节
-      HAL_UART_Transmit_IT(&huart2, (uint8_t*)Str, sizeof(Str));
-      
-      //循环内延时
-      HAL_Delay(750);
-      
-//      //读取ADC
-//      ADC_Value = HAL_ADC_GetValue(&hadc1);
-//      
-//      //更新亮度等级
-//      Light_Level = ADC_Value / 4096.0 * 100;
-//      
-//      //写入寄存器
-//      LED_Adjustting(&UserLEDs[Board_LED], Light_Level);
-      
+      //按键事件监视与响应
+      Key_EventScan();
+            
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -157,7 +154,6 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -182,13 +178,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC1;
-  PeriphClkInit.Adc1ClockSelection = RCC_ADC1PLLCLK_DIV1;
-
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }

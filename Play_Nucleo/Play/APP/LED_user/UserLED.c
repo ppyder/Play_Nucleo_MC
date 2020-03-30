@@ -12,5 +12,8 @@ void UserLED_Init(void)
     
     //驱动板红色LED，按IO方式初始化
     LED_ON_OFF_Init(&UserLEDs[Dev_LED], GPIOB, GPIO_PIN_2, GPIO_PIN_SET);
+    
+    //开启LED闪烁灯任务
+    LED_Task_Start(&UserLEDs[Dev_LED], LED_TASK_TWINKLE, 350, 3); //LED_TASK_BREATHE//
 }
 

@@ -42,7 +42,6 @@
 #include "io_bit_band_F4xx.h"
 #endif /* STM32Fx */
 
-
 /**
   * @brief 按键检测方式枚举定义
   */
@@ -126,6 +125,7 @@ void Key_INT_Init( pKey_t pKey, void (*pDealFunc)(KeyEvents_t Events),
 
 void Key_Scan(void);
 void Key_Int(uint16_t GPIO_Pin);
+void Key_EventScan(void);
 
 #endif /* KEY_H */
 
