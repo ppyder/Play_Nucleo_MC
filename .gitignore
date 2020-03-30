@@ -18,11 +18,10 @@ DebugConfig/
 RTE/
 settings/
 *.uvguix*
-*.uvoptx
-*.uvprojx
+# *.uvoptx
+# *.uvprojx
 settings/ * .uvguix * 
-encoderV1.0
-cconfig.h
+
 
 # Keil
 *.crf
