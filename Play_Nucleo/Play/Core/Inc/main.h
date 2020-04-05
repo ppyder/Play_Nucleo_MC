@@ -70,6 +70,8 @@ void Error_Handler(void);
 #define PhA_Current_GPIO_Port GPIOA
 #define BusV_Sens_Pin GPIO_PIN_1
 #define BusV_Sens_GPIO_Port GPIOA
+#define SPI_NSS_Pin GPIO_PIN_4
+#define SPI_NSS_GPIO_Port GPIOA
 #define Ctrl_LED_Pin GPIO_PIN_5
 #define Ctrl_LED_GPIO_Port GPIOA
 #define Adj_ResV_Pin GPIO_PIN_1

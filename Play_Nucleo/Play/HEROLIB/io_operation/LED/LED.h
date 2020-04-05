@@ -132,6 +132,7 @@ void LED_Adjustting(pLED_t pLED, float Level);
 void LED_Task_Start(pLED_t pLED, LEDTask_t Task, uint32_t Period, uint32_t Times);
 void LED_Task_Abort(pLED_t pLED);
 void LED_Task_AdjPeriod(pLED_t pLED, uint32_t NewPeriod);
+void LED_TaskUpdate(void);
 void LED_TaskLoop(void);
 
 #endif /* LED_H */

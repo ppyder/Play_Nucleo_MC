@@ -43,6 +43,7 @@ void (*pTaskFunc[LED_TASKNum])(pLED_t) = // LEDÈÎÎñº¯ÊıÖ¸ÕëÊı×é£¬Ë³ĞòÒÀ´ÓÃ¶¾ÙË³Ğ
     BreatheTask,
     TwinkleTask,
 };
+bool isTimerUpdated = false;            // ±ê¼Ç¼ÆÊ±Æ÷ÊÇ·ñ¸üĞÂÁË£¬·ÀÖ¹LEDÈÎÎñÔÚÖ÷Ñ­»·ÖĞ±»¹ı¶àµØµ÷ÓÃ
 
 /**
  * @brief	    °´IO·½Ê½³õÊ¼»¯LED
@@ -83,7 +84,7 @@ void LED_ON_OFF_Init(pLED_t pLED, GPIO_TypeDef* Port, uint16_t Pin, GPIO_PinStat
     
 #ifdef USING_BITBAND    
     //³õÊ¼»¯Î»´ø
-    pLED->LED_Write = &BIT_ADDR((uint32_t)Key_GPIO_Port + ODR_Addr_Offset, GPIO_Pin_Num);
+    pLED->LED_Write = &BIT_ADDR((uint32_t)Port + ODR_Addr_Offset, pLED->PinNum);
 #endif
     
     //³õÊ¼»¯×´Ì¬
@@ -381,22 +382,19 @@ void LED_Task_AdjPeriod(pLED_t pLED, uint32_t NewPeriod)
 }
 
 /**
- * @brief	LEDÖÜÆÚĞÔ×´Ì¬µ÷Õû
+ * @brief	LEDÖÜÆÚĞÔ×´Ì¬¸üĞÂ
  * @param	None.
  * @retval	None.
  * @note    ´Ëº¯ÊıÆÚÍû±»ÖÜÆÚĞÔµØµ÷ÓÃ£¬ÓÃÀ´ÊµÏÖLED×´Ì¬µÄ¶¯Ì¬µ÷ÕûÒÔÍê³ÉLEDÈÎÎñ¡£
  *          µ÷ÓÃÖÜÆÚÎª LED_LOOP_PERIOD £¬µ¥Î»Îªms¡£
  */
-void LED_TaskLoop(void)
+void LED_TaskUpdate(void)
 {
     //±éÀú¼ì²éLEDĞòÁĞ
     for(int i = 0; i < LEDNum; i++)
     {
         if(UserLEDs[i].isTasking)
-        {
-            //·ÖÀàµ÷ÓÃ´¦Àíº¯Êı
-            pTaskFunc[UserLEDs[i].TaskType](&UserLEDs[i]);
-            
+        {           
             //¼ÆÊ±×ÔÔö
             UserLEDs[i].TimeCnt += (uint32_t)LED_LOOP_PERIOD;
             
@@ -417,6 +415,32 @@ void LED_TaskLoop(void)
         }
     }
     
+    isTimerUpdated = true;
+    
+    return;
+}
+
+/**
+ * @brief	LEDÈÎÎñÖ´ĞĞ
+ * @param	None.
+ * @retval	None.
+ * @note    ´Ëº¯ÊıÆÚÍû±»ÔÚÖ÷Ñ­»·ÖĞµ÷ÓÃ¡£
+ */
+void LED_TaskLoop(void)
+{
+    //¶¨Ê±Æ÷ÄÚÈİ¸üĞÂºóÔÙÖ´ĞĞÔËËã
+    if(isTimerUpdated)
+    {
+        //±éÀú¼ì²éLEDĞòÁĞ
+        for(int i = 0; i < LEDNum; i++)
+        {
+            if(UserLEDs[i].isTasking)
+            {
+                //·ÖÀàµ÷ÓÃ´¦Àíº¯Êı
+                pTaskFunc[UserLEDs[i].TaskType](&UserLEDs[i]);
+            }
+        }
+    }
     return;
 }
 

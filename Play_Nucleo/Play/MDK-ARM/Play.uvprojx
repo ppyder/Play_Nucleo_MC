@@ -312,7 +312,7 @@
           </ArmAdsMisc>
           <Cads>
             <interw>1</interw>
-            <Optim>4</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -327,8 +327,8 @@
             <uC99>1</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
-            <v6Lang>1</v6Lang>
-            <v6LangP>1</v6LangP>
+            <v6Lang>3</v6Lang>
+            <v6LangP>3</v6LangP>
             <vShortEn>1</vShortEn>
             <vShortWch>1</vShortWch>
             <v6Lto>0</v6Lto>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F302x8</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;     ../Drivers/STM32F3xx_HAL_Driver/Inc;     ../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy;     ../Drivers/CMSIS/Device/ST/STM32F3xx/Include;     ../Drivers/CMSIS/Include;     ..\HEROLIB\communication;     ..\HEROLIB\communication\com_dev;     ..\HEROLIB\communication\temp;     ..\HEROLIB\AS5048a;     ..\HEROLIB\io_operation;     ..\HEROLIB\io_operation\Key;     ..\HEROLIB\io_operation\LED;     ..\HEROLIB\algorithms\filter;     ..\APP\Key_user;     ..\APP\LED_user;     ..\APP\AD_Monitor</IncludePath>
+              <IncludePath>../Core/Inc;    ../Drivers/STM32F3xx_HAL_Driver/Inc;    ../Drivers/STM32F3xx_HAL_Driver/Inc/Legacy;    ../Drivers/CMSIS/Device/ST/STM32F3xx/Include;    ../Drivers/CMSIS/Include;    ..\HEROLIB\communication;    ..\HEROLIB\communication\com_dev;    ..\HEROLIB\communication\temp;    ..\HEROLIB\AS5048a;    ..\HEROLIB\io_operation;    ..\HEROLIB\io_operation\Key;    ..\HEROLIB\io_operation\LED;    ..\HEROLIB\algorithms\filter;    ..\HEROLIB\tiny_delay;    ..\HEROLIB\time_reference;    ..\APP\Key_user;    ..\APP\LED_user;    ..\APP\AD_Monitor</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -471,11 +471,6 @@
               <FileName>LED.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HEROLIB\io_operation\LED\LED.c</FilePath>
-            </File>
-            <File>
-              <FileName>AS5048a.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HEROLIB\AS5048a\AS5048a.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -705,6 +700,31 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>HEROLIB/Time</GroupName>
+          <Files>
+            <File>
+              <FileName>TinyDelay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HEROLIB\tiny_delay\TinyDelay.c</FilePath>
+            </File>
+            <File>
+              <FileName>Time_Reference.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HEROLIB\time_reference\Time_Reference.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>HEROLIB/Devices</GroupName>
+          <Files>
+            <File>
+              <FileName>AS5048a.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HEROLIB\AS5048a\AS5048a.c</FilePath>
             </File>
           </Files>
         </Group>

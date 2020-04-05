@@ -32,6 +32,9 @@
 #include "UserKey.h" 
 #include "UserLED.h" 
 #include "AD_Monitor.h"
+#include "TinyDelay.h"
+#include "AS5048a.h"
+#include "Time_Reference.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,15 +60,19 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+//bool AS5048a_ReadWrite_DMA(pAS5048a_t pDev, uint16_t *pTxBuffer, volatile uint16_t *pRxBuffer);
+//bool AS5048a_ReadWrite_Block(pAS5048a_t pDevice, uint16_t *pTxBuffer, volatile uint16_t *pRxBuffer);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#define SYS_TICK_FREQUENCY 2000
 uint32_t Temp = 0;
 uint8_t Temp_ch = '\0';
-
+uint32_t DelayCnt = 0;
+uint32_t i = 0;
+uint16_t TempCMD = AS5048A_CMD_READANGLE; 
+uint16_t TempRead = 0;
 /* USER CODE END 0 */
 
 /**
@@ -102,7 +109,15 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_SPI3_Init();
+  MX_TIM6_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
+  
+    //延时100ms等待系统电源稳定
+    HAL_Delay(100);
+  
+    /* Reconfigure the SysTick interrupt to fire every 500 us. */
+    HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/SYS_TICK_FREQUENCY);
 
     //获取系统频率
     Temp = HAL_RCC_GetSysClockFreq();
@@ -125,8 +140,28 @@ int main(void)
     //获取ADC频率
     Temp = HAL_RCCEx_GetPeriphCLKFreq(RCC_PERIPHCLK_ADC1);
     
+    //初始化延时
+    TinyDelayInit(&htim6, 72);
+    
+    //初始化工作时间基准
+    TimeRef_Init(&htim16, 144);
+    
+    //开始计时
+    TimeRef_Start();
+        
+    //AS5048a初始化
+    AS5048a_Init(&AS5048a, 15000, GPIOA, GPIO_PIN_4, &hspi3, 49478, 5);
+    
     //测试发送字节
     HAL_UART_Transmit_IT(&huart2, (uint8_t*)Str, sizeof(Str));
+    
+    Temp = sizeof(AS5048a_AGCR_t);
+        
+//    for(i = 0; i < 1000000; i++)
+//    {
+//        while(AS5048A_STATE_BUSY == AS5048a.State);
+//        AS5048a_ReadWrite_Block(&AS5048a, &TempCMD, &TempRead);
+//    }
     
   /* USER CODE END 2 */
  
@@ -138,6 +173,15 @@ int main(void)
   {
       //按键事件监视与响应
       Key_EventScan();
+      
+      //LED任务执行
+      LED_TaskLoop();
+            
+      //转换监视的ADC值
+      RegularDataDeal();
+      
+      //更新总秒数
+      TimeRef_GetTotal();
             
     /* USER CODE END WHILE */
 
@@ -154,6 +198,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the CPU, AHB and APB busses clocks 
   */
@@ -178,6 +223,12 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_TIM16;
+  PeriphClkInit.Tim16ClockSelection = RCC_TIM16CLK_PLLCLK;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }

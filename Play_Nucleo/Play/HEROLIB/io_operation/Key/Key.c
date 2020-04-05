@@ -41,6 +41,9 @@ static uint32_t PinBit2PinNum(uint32_t PinBit);
 static void KeyErrorHandler(enum KeyErrorCode Code);
 static uint32_t GPIOPort2EXTIPort(GPIO_TypeDef* GPIOPort);
 
+/* Private variables --------------------------------------------------------*/
+bool isEventOccured = false;    // 事件发生标志，用于减少无谓的遍历操作
+
 /**
  * @brief	    按扫描方式初始化按键
  * @param[out]	pKey          - 指向被初始化结构体的指针
@@ -75,7 +78,7 @@ void Key_Scan_Init( pKey_t pKey, void (*pDealFunc)(KeyEvents_t Events),
     
 #ifdef USING_BITBAND    
     //初始化位带
-    pKey->Key_Pin_Read = &BIT_ADDR((uint32_t)Key_GPIO_Port + IDR_Addr_Offset, GPIO_Pin_Num);
+    pKey->Key_Pin_Read = &BIT_ADDR((uint32_t)Port + IDR_Addr_Offset, pKey->PinNum);
 #endif
     
     //记录按键功能信息
@@ -218,6 +221,9 @@ void Key_Scan(void)
             case NO_JUMPING:break;
             default:break;
         }
+        
+        //标记事件是否发生了(或逻辑)
+        isEventOccured = isEventOccured || (KEY_NOEVENT != UserKeys[i].Events);
     }
     
     if(TimeCnt > (KEY_SCAN_PERIOD - 1))
@@ -263,6 +269,9 @@ void Key_Int(uint16_t GPIO_Pin)
             //按键被释放了，说明逻辑下降沿发生了
             UserKeys[KeyIndex].Events = (KeyEvents_t)(UserKeys[KeyIndex].Target_Events & KEY_EVENT_UP);
         }
+        
+        //标记事件是否发生了(或逻辑)
+        isEventOccured = isEventOccured || (KEY_NOEVENT != UserKeys[KeyIndex].Events);
     }
     else { return; }
     
@@ -277,16 +286,26 @@ void Key_Int(uint16_t GPIO_Pin)
  */
 void Key_EventScan(void)
 {
-    //遍历所有按键
-    for(uint32_t i = 0; i < KeyNum; i++)
-    {       
-        //按照事件调用处理函数
-        if(KEY_NOEVENT != UserKeys[i].Events)
-        {
-            UserKeys[i].pDealFunc(UserKeys[i].Events);
-            UserKeys[i].Events = KEY_NOEVENT;
+    //有按键事件发生才做处理
+    if(isEventOccured)
+    {
+        //一次遍历后，所有的按键事件都将被执行。
+        // 放在前面的目的是，若后续函数中有较多延时操作，
+        // 那么新的按键事件请求将不会被掩盖。
+        isEventOccured = false;
+        
+        //遍历所有按键
+        for(uint32_t i = 0; i < KeyNum; i++)
+        {       
+            //按照事件调用处理函数
+            if(KEY_NOEVENT != UserKeys[i].Events)
+            {
+                UserKeys[i].pDealFunc(UserKeys[i].Events);
+                UserKeys[i].Events = KEY_NOEVENT;
+            }
         }
     }
+    else { return; }
     
     return;
 }

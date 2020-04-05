@@ -182,6 +182,9 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* adcHandle)
 
     __HAL_LINKDMA(adcHandle,DMA_Handle,hdma_adc1);
 
+    /* ADC1 interrupt Init */
+    HAL_NVIC_SetPriority(ADC1_IRQn, 4, 0);
+    HAL_NVIC_EnableIRQ(ADC1_IRQn);
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
   /* USER CODE END ADC1_MspInit 1 */
@@ -215,6 +218,9 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 
     /* ADC1 DMA DeInit */
     HAL_DMA_DeInit(adcHandle->DMA_Handle);
+
+    /* ADC1 interrupt Deinit */
+    HAL_NVIC_DisableIRQ(ADC1_IRQn);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
@@ -236,11 +242,11 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     //在DMA传输完成后会由HAL库置位hadc中State成员的HAL_ADC_STATE_REG_EOC位。
     //注意，此State是ADC句柄的成员变量，由HAL库底层管理。
     //      它不是状态寄存器本身，不与其中的EOC位同步。
-//    if (HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))
-//    {
+    if (HAL_IS_BIT_SET(HAL_ADC_GetState(&hadc1), HAL_ADC_STATE_REG_EOC))
+    {
         ADC_Cnt++;
-//        RegularDataDeal();
-//    }
+        isRegularUpdated = true;
+    }
     
 }
 

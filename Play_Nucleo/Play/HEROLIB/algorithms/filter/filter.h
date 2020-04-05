@@ -140,8 +140,9 @@ JumpingState GetJumpingState(StateFilter_t *pFilter);
 
 double DataFillter(double Value, FillterParam_t *Params);
 
-void SlidingAveFilterInit(SlidAveFilter_t *pFilter, float *pBuffer, uint32_t BufferSize);
+void SlidingAveFilterInit(SlidAveFilter_t *pFilter, float *pBuffer, uint32_t BufferSize, float InitValue);
 float SlidingAveFilter(SlidAveFilter_t *pFilter, float NewData);
+void SetSlidingAveBuffer(SlidAveFilter_t *pFilter, float Value);
 /**
   * @}
   */

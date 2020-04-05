@@ -5,7 +5,9 @@
 typedef struct 
 {
     uint16_t Adj_Resistance;        // 电压百分比，单位%
-    uint16_t Temperature;           // 芯片温度，单位℃
+    uint16_t Internal_Temperature;  // 芯片温度，单位℃
+    uint16_t External_Temperature;  // 外部温度
+    uint16_t Bus_Voltage;           // 母线电压
 }ADC_RawValues_t, *pADC_RawValues_t;
 
 #define ADC_14BIT_MAX_VALUE 4096    // 14位ADC测量最大值（输入电压与基准电压相等时的采样值）
@@ -13,6 +15,8 @@ typedef struct
 
 static inline float DealTemperatureValue(uint16_t Value);
 static inline float DealResistanceValue(uint16_t Value);
+
+bool isRegularUpdated = false;
 
 //DMA搬运来的原始数据
 ADC_RawValues_t ADC_RawValues;
@@ -33,11 +37,18 @@ void AD_MonitorInit(void)
     HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&ADC_RawValues, sizeof(ADC_RawValues));
 }
 
-//规则通道数据处理函数
+//规则通道数据处理函数(周期性调用即可)
 void RegularDataDeal(void)
 {
-    ADC_Values.Adj_Resistance = DealResistanceValue(ADC_RawValues.Adj_Resistance);
-    ADC_Values.Temperature = DealTemperatureValue(ADC_RawValues.Temperature);
+    if(isRegularUpdated)
+    {
+        //进行数据运算
+        ADC_Values.Adj_Resistance = DealResistanceValue(ADC_RawValues.Adj_Resistance);
+        ADC_Values.Temperature = DealTemperatureValue(ADC_RawValues.Internal_Temperature);
+        
+        isRegularUpdated = false;
+    }
+    
 }
 
 //处理温度数据

@@ -161,19 +161,26 @@ double DataFillter(double Value, FillterParam_t *pParams)
  * @param[out]  pFilter    待初始化滤波器的地址
  * @param[in]   pBuffer    数据接收缓冲区地址
  * @param[in]   BufferSize 缓冲区长度
+ * @param[in]   InitValue  初始化值
  * @retval	    None.
  */
-void SlidingAveFilterInit(SlidAveFilter_t *pFilter, float *pBuffer, uint32_t BufferSize)
+void SlidingAveFilterInit(SlidAveFilter_t *pFilter, float *pBuffer, uint32_t BufferSize, float InitValue)
 {
+    if(NULL == pFilter || NULL == pBuffer) { return; }
+    
     pFilter->pDataBuffer = pBuffer;
     pFilter->DataSize = BufferSize;
     
     pFilter->Sum = 0;
     pFilter->DataIndex = 0;
+    
+    SetSlidingAveBuffer(pFilter, InitValue);
+    
+    return;
 }
 
 /**
- * @brief	    滑动平均值滤波结构体初始化
+ * @brief	    滑动平均值滤波
  * @param[in]   pFilter    对应滤波器的地址
  * @param[in]   NewData    新采样数据
  * @retval	    滤波后的输出值.
@@ -183,6 +190,8 @@ void SlidingAveFilterInit(SlidAveFilter_t *pFilter, float *pBuffer, uint32_t Buf
 float SlidingAveFilter(SlidAveFilter_t *pFilter, float NewData)
 {
     float result = 0;
+    
+    if(NULL == pFilter || NULL == pFilter->pDataBuffer) { return 0; }
     
     //从求和器中去除最旧的数据
     pFilter->Sum -= pFilter->pDataBuffer[pFilter->DataIndex];
@@ -206,6 +215,30 @@ float SlidingAveFilter(SlidAveFilter_t *pFilter, float NewData)
     }
     
     return result;
+}
+
+/**
+ * @brief	    设置滑动平均值滤波器数据缓冲区
+ * @param[in]   pFilter    对应滤波器的地址
+ * @param[in]   Value      设定值
+ * @retval	    滤波后的输出值.
+ * @note    将缓冲区的每一个数据设定为预设值，并使累加器成为它们的和。
+ */
+void SetSlidingAveBuffer(SlidAveFilter_t *pFilter, float Value)
+{
+    if(NULL == pFilter || NULL == pFilter->pDataBuffer) { return; }
+    
+    //清零累加器
+    pFilter->Sum = 0;
+    
+    //重新赋值
+    for(int i = 0; i < pFilter->DataSize; i++)
+    {
+        pFilter->pDataBuffer[i] = Value;
+        pFilter->Sum += Value; 
+    }
+    
+    return;
 }
 
 /************************ (C) COPYRIGHT HITwh Excellent Robot Organization(HERO). *****END OF FILE****/
